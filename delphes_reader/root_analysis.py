@@ -16,24 +16,6 @@ import uproot
 
 from Uniandes_Framework.delphes_reader.particle.abstract_particle import Particle
 
-class Quiet:
-    ''' Context manager for silencing certain ROOT operations.  Usage:
-    with Quiet(level = ROOT.kInfo+1):
-       foo_that_makes_output
-
-    You can set a higher or lower warning level to ignore different
-    kinds of messages.  After the end of indentation, the level is set
-    back to what it was previously.
-    '''
-    def __init__(self, level=ROOT.kError+1):
-        self.oldlevel = ROOT.gErrorIgnoreLevel
-        self.level = level
-
-    def __enter__(self):
-        ROOT.gErrorIgnoreLevel = self.level
-
-    def __exit__(self, type, value, traceback):
-        ROOT.gErrorIgnoreLevel = self.oldlevel
 
 
 
@@ -123,6 +105,8 @@ def make_histograms(df: pd.DataFrame, integral: float = 1.0, hist_bins_dict: dic
                 hist.Scale(integral / hist.Integral() if hist.Integral() != 0 else 1.0)
                 hist_dict[column] = hist
     return hist_dict
+
+
 
 def histos_matplotlib(
         Dataset: pd.DataFrame, 
