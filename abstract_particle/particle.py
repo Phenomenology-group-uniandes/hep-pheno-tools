@@ -14,8 +14,8 @@ class Particle(ABC):
     Attributes:
     -----------
     tlv : TLorentzVector
-        A TLorentzVector representing the four-momentum of the particle, 
-        defined by its transverse momentum (Pt), pseudorapidity (Eta), 
+        A TLorentzVector representing the four-momentum of the particle,
+        defined by its transverse momentum (Pt), pseudorapidity (Eta),
         azimuthal angle (Phi), and mass (M).
     charge : float
         The electric charge of the particle.
@@ -36,31 +36,31 @@ class Particle(ABC):
         Returns the name of the Particle object.
 
     set_name(new_name: str) -> None:
-        Sets the name of the Particle object to the new name provided as an 
+        Sets the name of the Particle object to the new name provided as an
         argument.
 
     set_good_tag(value: int) -> None:
         Sets the good_tag label of the particle.
 
     get_good_tag(cuts: dict) -> int:
-        Defines and returns a label (good_tag) that indicates if the particle 
-        is within the range of kinematic cuts (Pt_min, Pt_max, Eta_min, 
+        Defines and returns a label (good_tag) that indicates if the particle
+        is within the range of kinematic cuts (Pt_min, Pt_max, Eta_min,
         Eta_max).
         good_tag could have two values:
             1: Particle is within the range of kinematic cuts.
             0: Particle is not within the range of kinematic cuts.
         Parameters:
             cuts (dict): A dictionary containing the values of kinematic cuts.
-            It should have the keys "pt_min_cut", "pt_max_cut" (optional), 
+            It should have the keys "pt_min_cut", "pt_max_cut" (optional),
             "eta_min_cut" and "eta_max_cut".
         Returns:
         int: good_tag.
 
     delta_R(v2: Particle) -> float:
-        Calculates and returns DeltaR metric between particle (self) and 
+        Calculates and returns DeltaR metric between particle (self) and
         another Particle object (v2).
         Parameters:
-            v2 (Particle): Another particle to calculate 
+            v2 (Particle): Another particle to calculate
             DeltaR respect to the main particle (self).
         Returns:
             float: DeltaR.
@@ -79,7 +79,7 @@ class Particle(ABC):
     Properties:
     --------
     p : float
-        Returns the full momentum (P) of the particle, which is the magnitude 
+        Returns the full momentum (P) of the particle, which is the magnitude
         of the three-momentum vector.
 
     pl : float
@@ -92,7 +92,7 @@ class Particle(ABC):
 
     phi : float
         Returns the azimuthal angle (Phi) of the particle, which is the angle
-        between the transverse momentum vector and a reference axis in the 
+        between the transverse momentum vector and a reference axis in the
         transverse plane.
 
     m : float
@@ -105,9 +105,10 @@ class Particle(ABC):
 
     Notes:
     ------
-    This is an abstract base class that cannot be instantiated on its own. It 
-    blueprint for subclasses that inherit its attributes and methods. Subclasses
-    should implement their own methods according to their specific use case.
+    This is an abstract base class that cannot be instantiated on its own.
+    It blueprint for subclasses that inherit its attributes and methods.
+    Subclasses should implement their own methods according to their specific
+    use case.
     '''
     def __init__(self, **kwargs):
         '''Initializes a new Particle object.
@@ -157,7 +158,7 @@ class Particle(ABC):
         return self.name
 
     def set_name(self, new_name: str) -> None:
-        '''Sets the name of the Particle object to the new name provided as an 
+        '''Sets the name of the Particle object to the new name provided as an
         argument.
         Args:
             new_name (str): The new name to assign to the particle.
@@ -187,7 +188,7 @@ class Particle(ABC):
     def pl(self) -> float:
         '''Returns the longitudinal momentum of the Particle object.
 
-        The longitudinal momentum is calculated using the full momentum (P) and 
+        The longitudinal momentum is calculated using the full momentum (P) and
         transverse momentum (Pt).
 
         Returns:
@@ -245,17 +246,17 @@ class Particle(ABC):
             raise ValueError("Error: good_tag value should be 0 or 1.")
         self.good_tag = value
 
-    def get_good_tag(self,cuts):
-        ''' Define and returns a label (good_tag) that indicate if particle is 
-        within the range of kinematic cuts (Pt_min, Pt_max, Eta_min, Eta_max). 
+    def get_good_tag(self, cuts):
+        ''' Define and returns a label (good_tag) that indicate if particle is
+        within the range of kinematic cuts (Pt_min, Pt_max, Eta_min, Eta_max).
 
-        good_tag could have two values: 
+        good_tag could have two values:
         1: Particle is within the range of kinematic cuts.
         0: Particle is not within the range of kinematic cuts.
 
         Parameters:
-            cuts (dict): contains the values of kinematic cuts. It should have 
-            the keys "pt_min_cut", "pt_max_cut" (optional), "eta_min_cut" and 
+            cuts (dict): contains the values of kinematic cuts. It should have
+            the keys "pt_min_cut", "pt_max_cut" (optional), "eta_min_cut" and
             "eta_max_cut".
 
         Returns:
@@ -264,7 +265,7 @@ class Particle(ABC):
         kin_cuts = cuts.get(self.Type)
 
         pt_min_cut = kin_cuts.get("pt_min_cut")
-        pt_max_cut = kin_cuts.get("pt_max_cut")#optional
+        pt_max_cut = kin_cuts.get("pt_max_cut")
         eta_min_cut = kin_cuts.get("eta_min_cut")
         eta_max_cut = kin_cuts.get("eta_max_cut")
 
@@ -284,11 +285,11 @@ class Particle(ABC):
 
     # Delta methods
     def delta_R(self, v2):
-        ''' Calculates and returns DeltaR between particle (self) and other 
+        ''' Calculates and returns DeltaR between particle (self) and other
         object of particle class (v2).
-   
+
         Parameters:
-            v2 (Particle): Another particle to calculate DeltaR respect to the 
+            v2 (Particle): Another particle to calculate DeltaR respect to the
             main particle (self).
 
         Returns:
@@ -299,11 +300,11 @@ class Particle(ABC):
         return tlv1.DeltaR(tlv2)
 
     def delta_eta(self, v2):
-        ''' Calculates and returns DeltaEta between particle (self) and other 
+        ''' Calculates and returns DeltaEta between particle (self) and other
         object of particle class (v2).
 
         Parameters:
-            v2 (Particle: Another particle to calculate DeltaEta respect to the 
+            v2 (Particle: Another particle to calculate DeltaEta respect to the
             main particle (self).
 
         Returns:
@@ -314,11 +315,11 @@ class Particle(ABC):
         return (tlv1.Eta() - tlv2.Eta())
 
     def delta_phi(self, v2):
-        ''' Calculates and returns DeltaPhi between particle (self) and other 
+        ''' Calculates and returns DeltaPhi between particle (self) and other
         object of particle class (v2).
 
         Parameters:
-            v2 (Particle): Another particle to calculate DeltaPhi respect to 
+            v2 (Particle): Another particle to calculate DeltaPhi respect to
             the main particle (self).
 
         Returns:
@@ -329,11 +330,11 @@ class Particle(ABC):
         return tlv1.DeltaPhi(tlv2)
 
     def delta_pt_scalar(self, v2):
-        ''' Calculates and returns sDeltaPT (s - scalar) between particle 
+        ''' Calculates and returns sDeltaPT (s - scalar) between particle
         (self) and other object of particle class (v2).
 
         Parameters:
-            v2 (Particle): Another particle to calculate sDeltaPT respect to 
+            v2 (Particle): Another particle to calculate sDeltaPT respect to
             the main particle (self).
 
         Returns:
@@ -344,8 +345,7 @@ class Particle(ABC):
         return (tlv1.Pt() - tlv2.Pt())
 
     def delta_pt_vectorial(self, v2):
-        ''' Calculates and returns vDeltaPT (v - vectorial) 
-        between particle 
+        ''' Calculates and returns vDeltaPT (v - vectorial) between particle
         (self) and other object of particle class (v2).
 
         Parameters:
@@ -363,11 +363,11 @@ class Particle(ABC):
         return c.Mod()
 
     def delta_p_vectorial(self, v2):
-        ''' Calculates and returns vDeltaP (v - vectorial) between particle 
+        ''' Calculates and returns vDeltaP (v - vectorial) between particle
         (self) and other object of particle class (v2).
 
         Parameters:
-            v2 (Particle): Another particle to calculate vDeltaP respect to the 
+            v2 (Particle): Another particle to calculate vDeltaP respect to the
             main particle (self).
 
         Returns:
