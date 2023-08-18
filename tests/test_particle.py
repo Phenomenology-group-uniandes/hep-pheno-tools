@@ -94,6 +94,18 @@ def test_delta_r(particle):
     assert particle2.delta_R(particle1) == pytest.approx(3.99708, rel=1e-5)
 
 
+def test_delta_pt_scalar(particle):
+    assert particle.delta_pt_scalar(particle) == pytest.approx(0.0, rel=1e-5)
+
+
+def test_delta_pt_vectorial(particle):
+    assert particle.delta_pt_vectorial(particle) == pytest.approx(0.0)
+
+
+def test_delta_p_vectorial(particle):
+    assert particle.delta_p_vectorial(particle) == pytest.approx(0.0)
+
+
 def test_tlv():
     tlv = TLorentzVector(1, 2, 3, 4)
     assert isinstance(tlv, TLorentzVector)
