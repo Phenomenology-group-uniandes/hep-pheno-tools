@@ -105,7 +105,3 @@ def test_delta_pt_vectorial(particle):
 def test_delta_p_vectorial(particle):
     assert particle.delta_p_vectorial(particle) == pytest.approx(0.0)
 
-
-def test_tlv():
-    tlv = TLorentzVector(1, 2, 3, 4)
-    assert isinstance(tlv, TLorentzVector)
