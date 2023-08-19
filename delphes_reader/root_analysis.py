@@ -17,8 +17,6 @@ import uproot
 from Uniandes_Framework.delphes_reader.particle.abstract_particle import Particle
 
 
-
-
 def get_kinematics_row(particles : list)->dict:
     """Extracts main kinematic variables of a particle (or more) and returns a dictionary with them.
 
@@ -57,55 +55,6 @@ def get_kinematics_row(particles : list)->dict:
             row[f"#Delta{{#vec{{pT}}}}_{{{name}{co_name}}}(GeV)"]=particle.vDeltaPT(co_particle)
             row[f"#Delta{{#vec{{p}}}}_{{{name}{co_name}}}(GeV)"]=particle.vDeltaP(co_particle)
     return row
-
-default_hist_bins_dict={
-    "#Delta{R}":[96,0,7],
-    "#Delta{#eta}":[80,-5,5],
-    "#Delta{#phi}":[52,-3.25,3.25],
-    "#Delta{pT}":[120, 0.0, 1500.0],
-    "#Delta{#vec{pT}}":[240, 0.0, 4800.0],
-    "#Delta{#vec{p}}":[240, 0.0, 4800.0],
-    "MET(GeV)":[80, 0.0, 1000.0],
-    "pT_": [160, 0.0, 2000.0],
-    "sT(GeV)": [200, 0.0, 4000.0],
-    "mT(GeV)": [200, 0.0, 4000.0],
-    "#eta_":[80, -5, 5],
-    "#phi_":[128, -3.2, 3.2],
-    "Energy_":[80, 0.0, 1000.0]
-}
-
-def make_histograms(df: pd.DataFrame, integral: float = 1.0, hist_bins_dict: dict = None) -> dict:
-    '''Creates histograms from the data in a DataFrame using ROOT.
-    Parameters:
-        df (pd.DataFrame): DataFrame containing the data.
-        integral (float): The desired integral of the histograms (default = 1.0).
-        hist_bins_dict (dict): A dictionary containing the binning for each histogram (default = None).
-    Returns:
-        dict: A dictionary containing the histograms.
-    '''
-    if hist_bins_dict is None:
-        hist_bins_dict = default_hist_bins_dict
-
-    if not isinstance(df, pd.DataFrame):
-        raise TypeError("df must be a pandas DataFrame")
-    if not isinstance(integral, float):
-        raise TypeError("integral must be a float")
-    if not isinstance(hist_bins_dict, dict):
-        raise TypeError("hist_bins_dict must be a dictionary")
-
-    hist_dict = {}
-
-    for column in df.columns:
-        for hist_key, bins in hist_bins_dict.items():
-            if hist_key in column:
-                x_axis = column.replace('(', '[').replace(')', ']')
-                hist = ROOT.TH1F(column, f"{x_axis}; Events", bins[0], bins[1], bins[2])
-                hist.SetDirectory(0)
-                [hist.Fill(dato) for dato in df[column]]
-                hist.Scale(integral / hist.Integral() if hist.Integral() != 0 else 1.0)
-                hist_dict[column] = hist
-    return hist_dict
-
 
 
 def histos_matplotlib(
@@ -328,8 +277,7 @@ def write_root_file(file_name: str, dict_Hist : Dict[str, TH1F]) -> None:
     if not all(isinstance(histogram, TH1F) for histogram in dict_Hist.values()):
         raise TypeError("dict_Hist must be a dictionary of TH1F histograms")
     
-
-    ROOT_File = TFile.Open(file_name, 'RECREATE') 
+    ROOT_File = TFile.Open(file_name, 'RECREATE')
 
     [dict_Hist[key].SetName(key) for key in dict_Hist.keys()]
     [dict_Hist[key].Write() for key in dict_Hist.keys()]
@@ -351,6 +299,7 @@ def get_root_file_keys(path_root_file: str) -> dict:
     file.close()
     return keys
     
+
 def read_root_file(path_root_file: str, expected_keys: list) -> dict:
     """
     This function reads a root file and returns a dictionary with the histograms contained in the root file.
@@ -389,6 +338,7 @@ def review_holes_in_histograms(Dict_Hist: Dict[str, TH1F]) -> List[str]:
             keys_histos_with_holes.append(key)
     return keys_histos_with_holes
 
+
 def fill_holes_in_histogram(histo, value_to_fill = 10e-4) -> List[str]:
     """
     Fill all the holes contained in a histogram.
@@ -402,6 +352,7 @@ def fill_holes_in_histogram(histo, value_to_fill = 10e-4) -> List[str]:
     for i in range(1, histo.GetNbinsX()+1): 
         if (histo.GetBinContent(i) == 0 ): histo.SetBinContent(i, value_to_fill)
     return histo
+
 
 def write_txt_file_with_high_per_bin(file_name :str, Dict_Hist :Dict[str, TH1F]) -> None:
     """
