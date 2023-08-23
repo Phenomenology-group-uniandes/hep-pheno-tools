@@ -3,6 +3,7 @@ import os
 from ..abstract_particle import Particle
 from ..delphes_reader.particles import ElectronParticle
 from ..delphes_reader.particles import JetParticle
+from ..delphes_reader.particles import MetParticle
 from ..analysis_tools import Quiet
 
 import ROOT
@@ -63,3 +64,20 @@ def test_jet_particle(event):
     assert jet.phi == pytest.approx(-1.5713, rel=1e-3)
     assert jet.m == pytest.approx(4.2627, rel=1e-3)
     assert jet.energy == pytest.approx(127.211, rel=1e-3)
+
+
+def test_muon_particle(event):
+    met_particle = MetParticle(event)
+    assert isinstance(met_particle, MetParticle)
+    assert met_particle.charge == 0.0
+    assert met_particle.name == "MET"
+    assert met_particle.kind == "MET"
+    # Test the TLV attribute
+    assert isinstance(met_particle.tlv, ROOT.TLorentzVector)
+    assert met_particle.p == pytest.approx(69.636, rel=1e-3)
+    assert met_particle.pt == pytest.approx(69.636, rel=1e-3)
+    assert met_particle.energy == pytest.approx(69.636, rel=1e-3)
+    assert met_particle.phi == pytest.approx(0.45084, rel=1e-3)
+    assert met_particle.eta == pytest.approx(0.0, abs=1e-3)
+    assert met_particle.pl == pytest.approx(0.0, abs=1e-3)
+    assert met_particle.m == pytest.approx(0.0, abs=1e-3)
