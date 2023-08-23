@@ -1,6 +1,7 @@
 from itertools import product
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 import ROOT
 
 default_hist_bins_dict = {
@@ -99,3 +100,66 @@ def make_histograms(
         hist_dict[column] = hist
 
     return hist_dict
+
+
+def histos_matplotlib(
+        Dataset: pd.DataFrame,
+        column_key: str,
+        log: bool = False,
+        c: str = 'blue',
+        file_name: str = None,
+        nbins: int = 100
+        ) -> None:
+    ''' Uses matplotlib to create histograms using all data contained in a
+    column of a DataFrame.
+    Parameters:
+        Dataset (DataFrame): It is a DataFrame where each row correspond to a
+        different particle and each column to its corresponding kinematic
+        variable value.
+        column_key (str): It is the key of the column that we want to plot as
+        a histogram.
+        log (bool): If True, the logarithm of the data will be used.
+        c (str): Histogram color.
+        file_name (str): File name that would be used to save the plot.
+        nbins (int): Bins number.
+    '''
+    if not isinstance(Dataset, pd.DataFrame):
+        raise TypeError("Dataset must be a pandas DataFrame")
+    if not isinstance(column_key, str):
+        raise TypeError("column_key must be a string")
+    if not isinstance(log, bool):
+        raise TypeError("log must be a boolean")
+    if not isinstance(c, str):
+        raise TypeError("c must be a string")
+    if not isinstance(file_name, str):
+        raise TypeError("file_name must be a string")
+    if not isinstance(nbins, int):
+        raise TypeError("nbins must be an integer")
+
+    data = Dataset[column_key]
+    if log:
+        data = np.log10(data)
+
+    fig, ax = plt.subplots(figsize=(6, 4))
+    ax.hist(data, bins=nbins, color=c, density=True)
+
+    # Ensure latex compatibility from root names
+    char_map = {
+        '#': '\\',
+        '(': '[',
+        ')': ']'
+        }
+    name = '$' + ''.join(char_map.get(c, c) for c in column_key) + '$'
+
+    ax.set_xlabel(name, fontsize=12)
+    ax.set_ylabel('A.U', fontsize=12)
+
+    statistics = f'Mean = {data.mean():.3f}, STD = {data.std():.3f}'
+    ax.set_title(statistics, loc='right', fontsize=12)
+
+    if file_name:
+        fig.savefig(file_name, bbox_inches='tight')
+
+    plt.show()
+
+    return fig, ax

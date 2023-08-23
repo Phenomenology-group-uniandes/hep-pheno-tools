@@ -100,3 +100,5 @@ def test_make_histograms_with_non_float_integral():
     df = pd.DataFrame({'x': [1, 2, 3], 'y': [4, 5, 6]})
     with pytest.raises(TypeError):
         make_histograms(df, integral='a')
+
+# To do: test_histos_matplotlib
