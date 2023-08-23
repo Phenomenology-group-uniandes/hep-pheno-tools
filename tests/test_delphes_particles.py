@@ -4,6 +4,7 @@ from ..abstract_particle import Particle
 from ..delphes_reader.particles import ElectronParticle
 from ..delphes_reader.particles import JetParticle
 from ..delphes_reader.particles import MetParticle
+from ..delphes_reader.particles import MuonParticle
 from ..analysis_tools import Quiet
 
 import ROOT
@@ -66,7 +67,7 @@ def test_jet_particle(event):
     assert jet.energy == pytest.approx(127.211, rel=1e-3)
 
 
-def test_muon_particle(event):
+def test_met_particle(event):
     met_particle = MetParticle(event)
     assert isinstance(met_particle, MetParticle)
     assert met_particle.charge == 0.0
@@ -81,3 +82,22 @@ def test_muon_particle(event):
     assert met_particle.eta == pytest.approx(0.0, abs=1e-3)
     assert met_particle.pl == pytest.approx(0.0, abs=1e-3)
     assert met_particle.m == pytest.approx(0.0, abs=1e-3)
+
+
+def test_muon_particle(event):
+    if event.Muon.GetEntries() == 0:
+        pytest.skip("No muons in this event")
+    muon = MuonParticle(event, 0)
+    assert isinstance(muon, Particle)
+    assert muon.kind == "muon"
+    assert muon.name == "#mu"
+    assert muon.charge == -1
+    # Test the TLV attribute
+    assert isinstance(muon.tlv, ROOT.TLorentzVector)
+    assert muon.p == pytest.approx(34.265, rel=1e-3)
+    assert muon.pt == pytest.approx(34.265, rel=1e-3)
+    assert muon.energy == pytest.approx(34.265, rel=1e-3)
+    assert muon.phi == pytest.approx(-2.7404, rel=1e-3)
+    assert muon.eta == pytest.approx(0.0, abs=1e-3)
+    assert muon.pl == pytest.approx(34.265, rel=1e-3)
+    assert muon.m == pytest.approx(0.1056583755, rel=1e-3)
