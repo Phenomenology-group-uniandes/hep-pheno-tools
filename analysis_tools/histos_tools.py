@@ -1,5 +1,5 @@
 from itertools import product
-from typing import Dict, Tuple
+from typing import List, Dict, Tuple
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -247,3 +247,48 @@ def overlap_root_histos(
     legend.Draw('same')
 
     return histos, canvas, legend
+
+
+def sum_histos(histo_list: List[ROOT.TH1F], substract=False) -> ROOT.TH1F:
+    '''Sums histograms in a list using ROOT library.
+    Parameters:
+        histo_list (List[TH1F]): List of histograms to be summed.
+    Return:
+        TH1F: Histogram with the sum of all histograms in histo_list.
+    '''
+    # Check that histo_list is a list of TH1F
+    if not all(isinstance(histo, ROOT.TH1F) for histo in histo_list):
+        raise TypeError("histo_list must be a list of TH1F")
+
+    # Check that all histograms have the same number of bins and bin width
+    bin_width = histo_list[0].GetBinWidth(0)
+    nbins = histo_list[0].GetNbinsX()
+    x_low = histo_list[0].GetBinLowEdge(1)
+    x_up = histo_list[0].GetBinLowEdge(nbins) + bin_width
+
+    def check_bins(h):
+        A = h.GetNbinsX() != nbins
+        B = np.isclose(h.GetBinWidth(0), bin_width)
+        C = np.isclose(h.GetBinLowEdge(1), x_low)
+        D = np.isclose(h.GetBinLowEdge(nbins) + h.GetBinWidth(0), x_up)
+        return A or not B or not C or not D
+
+    if any(check_bins(h) for h in histo_list):
+        raise ValueError("All histograms must have the same binning")
+
+    # Initialize result histogram with bin information
+    xlow = histo_list[0].GetBinLowEdge(1)
+    xup = histo_list[0].GetBinLowEdge(nbins) + bin_width
+    result = ROOT.TH1F('sum', 'sum', nbins, xlow, xup)
+    result.SetDirectory(0)
+
+    if substract:
+        result.Add(histo_list[0])
+        for n in range(1, len(histo_list)):
+            result.Add(histo_list[n], -1.0)
+    else:
+        # Sum histograms and errors
+        for histo in histo_list:
+            result.Add(histo)
+
+    return result

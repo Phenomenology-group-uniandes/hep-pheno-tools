@@ -4,7 +4,8 @@ from .histos_tools import (
     get_hist_bins_by_column,
     make_histograms,
     histos_matplotlib,
-    overlap_root_histos
+    overlap_root_histos,
+    sum_histos
 )
 from .power_tests import approx_global_sig
 
@@ -18,4 +19,5 @@ __all__ = [
     "histos_matplotlib",
     "overlap_root_histos",
     "approx_global_sig",
+    "sum_histos"
 ]

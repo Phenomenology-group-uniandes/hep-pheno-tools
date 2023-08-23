@@ -19,43 +19,6 @@ from Uniandes_Framework.delphes_reader.particle.abstract_particle import Particl
 
 
 
-
-
-def sum_histos(histo_list: List[TH1F], substract = False) -> TH1F:
-    '''Sums histograms in a list using ROOT library.
-    Parameters:
-        histo_list (List[TH1F]): List of histograms to be summed.
-    Return:
-        TH1F: Histogram with the sum of all histograms in histo_list.
-    '''
-    
-    # Check that histo_list is a list of TH1F
-    if not all(isinstance(histo, TH1F) for histo in histo_list):
-        raise TypeError("histo_list must be a list of TH1F")
-    
-    # Check that all histograms have the same number of bins and bin width
-    bin_width = histo_list[0].GetBinWidth(0)
-    nbins = histo_list[0].GetNbinsX()
-    
-    if any(histo.GetNbinsX() != nbins or not np.isclose(histo.GetBinWidth(0), bin_width) for histo in histo_list):
-        raise ValueError("All histograms must have the same number of bins and bin width")
-    
-    # Initialize result histogram with bin information
-    xlow = histo_list[0].GetBinLowEdge(1)
-    xup = histo_list[0].GetBinLowEdge(nbins) + bin_width
-    result = TH1F('sum', 'sum', nbins, xlow, xup)
-    result.SetDirectory(0)
-    
-    if substract:
-        result.Add(histo_list[0])
-        for n in range(1, len(histo_list)): result.Add(histo_list[n], -1.0)
-    else:
-        # Sum histograms and errors
-        for histo in histo_list:
-            result.Add(histo)
-    
-    return result
-
 def generate_csv(dictionary_list :list ,file_name: str) -> None:
     ''' Uses Pandas to create a csv file using all data contained in a list of directories.  
     Parameters:

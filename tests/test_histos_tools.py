@@ -102,3 +102,5 @@ def test_make_histograms_with_non_float_integral():
         make_histograms(df, integral='a')
 
 # To do: test_histos_matplotlib
+# To do: test_overlap_root_histos
+# To do: test_sum_histos
