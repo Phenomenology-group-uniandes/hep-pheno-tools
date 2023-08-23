@@ -157,8 +157,9 @@ class DelphesLoader():
 
     def get_nevents(self, Forest: list = None) -> int:
         """
-        Get the number of events in the delphes root outputs when Forest isn't None.
-        if Forest is None, use the default Forest and return the number of events.
+        Get the number of events in the delphes root outputs when Forest isn't
+        None. if Forest is None, use the default Forest and return the number
+        of events.
 
         parameters
         ----------
