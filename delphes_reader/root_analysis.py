@@ -6,15 +6,17 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 import ROOT
-from ROOT import TH1F
-from ROOT import TCanvas #It is necessary to show plots with ROOT.
-from ROOT import TH1F #It is necessary to plot histograms with ROOT.
-from ROOT import THStack #It is necessary to plot many histograms at the same time with ROOT.
-from ROOT import TLegend #It is necessary to plot labels when you plot many histograms at the same time with ROOT.
-from ROOT import TFile #It is necessary to save histograms in a .root file.
+from ROOT import (
+    TH1F,
+    TCanvas,
+    THStack,
+    TLegend,
+    TFile
+)
 import uproot
 
 from Uniandes_Framework.delphes_reader.particle.abstract_particle import Particle
+
 
 
 def get_kinematics_row(particles : list)->dict:
@@ -29,9 +31,8 @@ def get_kinematics_row(particles : list)->dict:
     if not isinstance(particles, list):
         raise TypeError("Particles must be a list of Particle objects")
 
-    if any( not isinstance(particle, Particle) for particle in particles):
-        #raise TypeError("Particles must be a list of Particle objects")
-        pass
+    if any(not isinstance(particle, Particle) for particle in particles):
+        raise TypeError("Particles must be a list of Particle objects")
 
     row = {}
     for i, particle in enumerate(particles):
@@ -55,7 +56,6 @@ def get_kinematics_row(particles : list)->dict:
             row[f"#Delta{{#vec{{pT}}}}_{{{name}{co_name}}}(GeV)"]=particle.vDeltaPT(co_particle)
             row[f"#Delta{{#vec{{p}}}}_{{{name}{co_name}}}(GeV)"]=particle.vDeltaP(co_particle)
     return row
-
 
 def histos_matplotlib(
         Dataset: pd.DataFrame, 
