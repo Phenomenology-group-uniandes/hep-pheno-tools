@@ -2,6 +2,7 @@ import pytest
 import os
 from ..abstract_particle import Particle
 from ..delphes_reader.particles import ElectronParticle
+from ..delphes_reader.particles import JetParticle
 from ..analysis_tools import Quiet
 
 import ROOT
@@ -40,3 +41,25 @@ def test_electron_particle(event):
 
     # Test the Type attribute
     assert electron.kind == "electron"
+
+
+def test_jet_particle(event):
+    # Create a JetParticle object
+    jet = JetParticle(event, 0)
+    # Check that the object attributes were initialized correctly
+    assert jet.kind == 'l_jet'
+    assert jet.name == 'l_jet_{0}'
+    assert jet.b_tag in [0, 1]
+    assert jet.tau_tag in [0, 1]
+    assert jet.c_tag in [0, 1]
+    assert jet.flavor in [0, 1, 2, 3, 4, 5, 22]
+    assert isinstance(jet.charge, float)
+
+    # Test the TLV attribute
+    assert isinstance(jet.tlv, ROOT.TLorentzVector)
+    assert jet.p == pytest.approx(127.211, rel=1e-3)
+    assert jet.pt == pytest.approx(122.89, rel=1e-3)
+    assert jet.eta == pytest.approx(-0.26433, rel=1e-3)
+    assert jet.phi == pytest.approx(-1.5713, rel=1e-3)
+    assert jet.m == pytest.approx(4.2627, rel=1e-3)
+    assert jet.energy == pytest.approx(127.211, rel=1e-3)
