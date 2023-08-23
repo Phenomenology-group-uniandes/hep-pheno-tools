@@ -27,7 +27,7 @@ def test_set_good_tag(particle):
 
 def test_get_good_tag(particle):
     particle.set_good_tag(1)
-    assert particle.get_good_tag() == 1
+    assert particle.get_good_tag(None) == 1
 
 
 def test_pt(particle):
