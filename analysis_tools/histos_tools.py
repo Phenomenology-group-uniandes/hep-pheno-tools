@@ -1,4 +1,5 @@
 from itertools import product
+from typing import Dict, Tuple
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -19,6 +20,12 @@ default_hist_bins_dict = {
     "#phi_": [128, -3.2, 3.2],
     "Energy_": [80, 0.0, 1000.0]
 }
+
+char_map = {
+    '#': '\\',
+    '(': '[',
+    ')': ']'
+    }
 
 
 def get_hist_bins_by_column(column: np.ndarray) -> list:
@@ -144,11 +151,6 @@ def histos_matplotlib(
     ax.hist(data, bins=nbins, color=c, density=True)
 
     # Ensure latex compatibility from root names
-    char_map = {
-        '#': '\\',
-        '(': '[',
-        ')': ']'
-        }
     name = '$' + ''.join(char_map.get(c, c) for c in column_key) + '$'
 
     ax.set_xlabel(name, fontsize=12)
@@ -163,3 +165,85 @@ def histos_matplotlib(
     plt.show()
 
     return fig, ax
+
+
+def overlap_root_histos(
+        kinematic_variable: str,
+        dict_histos: Dict[str, Dict[str, ROOT.TH1F]],
+        alpha: float = 0.05,
+        stack: bool = False,
+        log_scale: bool = False, grid: bool = False,
+        y_range: Tuple[float, float] = (1, 100)
+        ) -> Tuple[ROOT.THStack, ROOT.TCanvas, ROOT.TLegend]:
+    '''Uses ROOT to overlap histograms using all kinematic variable's
+    histograms contained in a dictionary.
+    Parameters:
+        kinematic_variable (str): Name of the kinematic variable. It must be
+        also the key to access the corresponding histograms inside dict_histos.
+        dict_histos (dict): Directory that contains all the histograms. This
+        dictionary should have keys with the name of the signals, and each
+        signal should have other dictionaries with the same structure as an}
+        output of make_histograms.
+        alpha (float): Histogram transparency. It must be between 0 and 1.
+        stack (bool): If True, the plot of histograms will consider a Stack
+        between them.
+        log_scale (bool): If True, the histogram will be plotted using log10
+        scale.
+        grid (bool): If True, the canvas will plot a grid in the graphic.
+    Returns:
+        tuple of THStack, TCanvas, and TLegend objects.
+    '''
+
+    if not isinstance(kinematic_variable, str):
+        raise TypeError("kinematic_variable must be a string")
+    if not isinstance(dict_histos, dict):
+        raise TypeError("dict_histos must be a dictionary")
+    if not isinstance(alpha, float):
+        raise TypeError("alpha must be a float")
+    if not isinstance(stack, bool):
+        raise TypeError("stack must be a boolean")
+    if not isinstance(log_scale, bool):
+        raise TypeError("log_scale must be a boolean")
+    if not isinstance(grid, bool):
+        raise TypeError("grid must be a boolean")
+    if not 0 <= alpha <= 1:
+        raise ValueError("alpha must be between 0 and 1")
+
+    canvas = ROOT.TCanvas('', '', 600, 400)
+    legend = ROOT.TLegend(0.6, .8, 0.89, .89)
+    legend.SetNColumns(4)
+    legend.SetLineWidth(1)
+
+    histos = ROOT.THStack('hist', '')
+
+    for i, (signal, histo_dict) in enumerate(dict_histos.items()):
+        if histo_dict:
+            histo = histo_dict[kinematic_variable]
+            histo.SetLineColor(i + 1)
+            histo.SetFillColorAlpha(i + 1, alpha)
+            histo.SetLineWidth(2)
+            histo.SetDirectory(0)
+            histos.Add(histo)
+            legend.AddEntry(histo, signal)
+
+    x_axis = "".join(char_map.get(c, c) for c in kinematic_variable)
+
+    if stack:
+        histos.Draw("hist")
+        histos.SetTitle(f'; {x_axis}; Events')
+    else:
+        histos.Draw("histnostack")
+        histos.SetTitle(f'; {x_axis}; A.U')
+
+    if log_scale:
+        canvas.SetLogy()
+    histos.SetMinimum(y_range[0])
+    histos.SetMaximum(y_range[1])
+
+    if grid:
+        canvas.SetGrid()
+
+    canvas.Draw()
+    legend.Draw('same')
+
+    return histos, canvas, legend

@@ -2,7 +2,9 @@ from .quiet import Quiet
 from .histos_tools import (
     default_hist_bins_dict,
     get_hist_bins_by_column,
-    make_histograms
+    make_histograms,
+    histos_matplotlib,
+    overlap_root_histos
 )
 from .power_tests import approx_global_sig
 
@@ -13,5 +15,7 @@ __all__ = [
     "default_hist_bins_dict",
     "get_hist_bins_by_column",
     "make_histograms",
-    "approx_global_sig"
+    "histos_matplotlib",
+    "overlap_root_histos",
+    "approx_global_sig",
 ]
