@@ -16,6 +16,20 @@ def test_particle_creation(particle):
     assert particle.kind == "electron"
 
 
+def test_set_good_tag(particle):
+    particle.set_good_tag(1)
+    assert particle.good_tag == 1
+    with pytest.raises(ValueError):
+        particle.set_good_tag(2)
+    with pytest.raises(ValueError):
+        particle.set_good_tag(-1)
+
+
+def test_get_good_tag(particle):
+    particle.set_good_tag(1)
+    assert particle.get_good_tag() == 1
+
+
 def test_pt(particle):
     particle.tlv.SetPtEtaPhiM(50, 1.5, 0.5, 0.5)
     assert particle.pt == 50

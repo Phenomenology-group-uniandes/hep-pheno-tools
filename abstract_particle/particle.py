@@ -262,7 +262,11 @@ class Particle(ABC):
         Returns:
             float: good_tag.
         '''
-        kin_cuts = cuts.get(self.Type)
+        try:
+            return self.good_tag
+        except AttributeError:
+            pass
+        kin_cuts = cuts.get(self.kind)
 
         pt_min_cut = kin_cuts.get("pt_min_cut")
         pt_max_cut = kin_cuts.get("pt_max_cut")
