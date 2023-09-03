@@ -1,9 +1,13 @@
+import os
 from itertools import product
 from typing import List, Dict, Tuple
+
 import numpy as np
 import pandas as pd
+import uproot
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
+
 import ROOT
 
 default_hist_bins_dict = {
@@ -27,6 +31,13 @@ char_map = {
     '(': '[',
     ')': ']'
     }
+
+char_map_path = {
+  "#": "",
+  "{": "",
+  "}": "",
+  " ": "_"
+}
 
 
 def get_hist_bins_by_column(column: np.ndarray) -> list:
@@ -369,3 +380,100 @@ def fill_histogram_holes_interp1d(hist):
     # Update the histogram with the interpolated data
     for i in range(1, hist.GetNbinsX()+1):
         hist.SetBinContent(i, hist_data[i-1])
+
+    return hist
+
+
+def save_histograms_png(
+        path_to_save: str,
+        dict_hist: Dict[str, ROOT.TH1F],
+        log_y: bool = False
+        ) -> None:
+    """Save histograms as .png files.
+
+    Parameters:
+        path_to_save: Folder name that will be used to save all histograms as
+        .png files.
+        dict_hist: Dictionary that contains all the histograms.
+        log_y: If True, the histogram will be plotted using log 10 Y-scale.
+    """
+
+    if not isinstance(path_to_save, str):
+        raise TypeError("path_to_save must be a string")
+    if not all(isinstance(histo, ROOT.TH1F) for histo in dict_hist.values()):
+        raise TypeError("dict_hist must be a dictionary of TH1F")
+    if not isinstance(log_y, bool):
+        raise TypeError("log_y must be a boolean")
+
+    for key, histo in dict_hist.items():
+        canvas = ROOT.TCanvas(key, "", 0, 0, 1280, 720)
+        canvas.SetGrid()
+        if log_y:
+            canvas.SetLogy()
+        histo.Draw("hist")
+        path = os.path.join(path_to_save, f"histograms_{key}.png")
+        path = "".join(char_map_path.get(c, c) for c in path)
+        canvas.SaveAs()
+
+
+def write_root_file(file_name: str, dict_Hist: Dict[str, ROOT.TH1F]) -> None:
+    """
+    This function writes a root file with the histograms contained in a dict.
+    Parameters:
+        file_name (string): It is the name that the .root file will have.
+        dict_Hist (dictionary): It is a dictionary where the keys are the names
+        of the histograms and the values are the TH1F histograms .
+    """
+    if not isinstance(file_name, str):
+        raise TypeError("name must be a string")
+    if not all(isinstance(h, ROOT.TH1F) for h in dict_Hist.values()):
+        raise TypeError("dict_Hist must be a dictionary of TH1F histograms")
+
+    ROOT_File = ROOT.TFile.Open(file_name, 'RECREATE')
+
+    [dict_Hist[key].SetName(key) for key in dict_Hist.keys()]
+    [dict_Hist[key].Write() for key in dict_Hist.keys()]
+
+    ROOT_File.Close()
+
+
+def get_root_file_keys(path_root_file: str) -> dict:
+    """
+    This function returns the keys of the histograms contained in a root file.
+    Parameters:
+        path_root_file (string): It is the path of the root file.
+
+    Returns:
+        keys (list): It is a list with the names of the histograms that are in
+        the root file.
+    """
+    file = uproot.open(path_root_file)
+    keys = [key.replace(';1', '') for key in file.keys()]
+    file.close()
+    return keys
+
+
+def read_root_file(path_root_file: str, expected_keys: list) -> dict:
+    """
+    This function reads a root file and returns a dictionary with the histos
+    contained in the root file.
+    Parameters:
+        path_root_file (string): It is the path of the root file.
+        expected_keys (list): It is a list with the names of the histograms
+        that are expected to be in the root file.
+
+    Returns:
+        dictionary: It is a dictionary where the keys are the names of the
+        histograms and the values are the histograms.
+    """
+    Dict_hist = {}
+    File = ROOT.TFile.ROOT.TFile.Open(path_root_file, 'READ')
+    for key in expected_keys:
+        histogram = File.Get(key)
+        try:
+            histogram.SetDirectory(0)
+        except AttributeError:
+            pass
+        Dict_hist[key] = histogram
+    File.Close()
+    return Dict_hist
