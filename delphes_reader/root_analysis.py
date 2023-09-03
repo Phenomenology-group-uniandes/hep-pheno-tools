@@ -19,8 +19,12 @@ from Uniandes_Framework.delphes_reader.particle.abstract_particle import Particl
 
 
 
+
+
+
+
 def generate_csv(dictionary_list :list ,file_name: str) -> None:
-    ''' Uses Pandas to create a csv file using all data contained in a list of directories.  
+    '''Uses Pandas to create a csv file using all data contained in a list of directories.  
     Parameters:
         dictionary_list (list): It is a list where each member is a dictionary with the structure of get_kinematics_row outputs.
         file_name (string): It is the name that the .csv file will have.
@@ -117,39 +121,6 @@ def read_root_file(path_root_file: str, expected_keys: list) -> dict:
         Dict_hist[key] = histogram
     File.Close()
     return Dict_hist
-               
-def review_holes_in_histograms(Dict_Hist: Dict[str, TH1F]) -> List[str]:
-    """
-    Returns a list with the names of all histograms with holes contained in a python dictionary (Dict_Hist).
-    Parameters:
-        Dict_Hist (Dict[str, TH1F]): It is the dictionary that contains all the histograms.
-    Return:
-        List[str]: List with the names of all histograms with holes.
-    """
-
-    if not all(isinstance(histogram, TH1F) for histogram in Dict_Hist.values()):
-        raise TypeError("Dict_Hist must be a dictionary of TH1F histograms")
-    
-    keys_histos_with_holes = []
-    for key, histo in Dict_Hist.items():
-        if any(histo.GetBinContent(i) == 0 for i in range(1, histo.GetNbinsX()+1)):
-            keys_histos_with_holes.append(key)
-    return keys_histos_with_holes
-
-
-def fill_holes_in_histogram(histo, value_to_fill = 10e-4) -> List[str]:
-    """
-    Fill all the holes contained in a histogram.
-    
-    Parameters:
-        histo (TH1F): histograms with holes.
-        value_to_fill (Float): value that will be used to fill the histogram holes.
-    Return:
-        histo (TH1F): histogram without holes.
-    """
-    for i in range(1, histo.GetNbinsX()+1): 
-        if (histo.GetBinContent(i) == 0 ): histo.SetBinContent(i, value_to_fill)
-    return histo
 
 
 def write_txt_file_with_high_per_bin(file_name :str, Dict_Hist :Dict[str, TH1F]) -> None:
@@ -176,13 +147,12 @@ def extract_branching_ratio_from_param_card(path_paramcard, PID1, PID2):
     Returns:
         BR (float): Branching Ratio.
     """    
-    
+    key='#  BR             NDA  ID1    ID2   ...\n'
     ID1 = str(ID1)
     ID2 = str(ID2)
     with open(f'{path_paramcard}', 'r') as file:
         d = file.readlines()
-        position = int(np.where(np.array(d) == '#  BR             NDA  ID1    ID2   ...\n')[0]) # Position of  '#  BR             NDA  ID1    ID2   ...\n' 
-    
+        position = int(np.where(np.array(d) == )[0]) 
         for i in range(position, len(d)):
             row = d[i].rstrip().split(" ")
         

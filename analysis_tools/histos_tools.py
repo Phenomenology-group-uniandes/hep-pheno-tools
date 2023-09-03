@@ -3,6 +3,7 @@ from typing import List, Dict, Tuple
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from scipy.interpolate import interp1d
 import ROOT
 
 default_hist_bins_dict = {
@@ -292,3 +293,79 @@ def sum_histos(histo_list: List[ROOT.TH1F], substract=False) -> ROOT.TH1F:
             result.Add(histo)
 
     return result
+
+
+def get_histos_with_holes(Dict_Hist: Dict[str, ROOT.TH1F]) -> List[str]:
+    """
+    Returns a list with the names of all histograms with holes contained in a
+    python dictionary (Dict_Hist).
+    Parameters:
+        Dict_Hist (Dict[str, TH1F]): It is the dictionary that contains all
+        the histograms.
+    Return:
+        List[str]: List with the names of all histograms with holes.
+    """
+
+    if not all(isinstance(h, ROOT.TH1F) for h in Dict_Hist.values()):
+        raise TypeError("Dict_Hist must be a dictionary of TH1F histograms")
+
+    def count_zeros(histo):
+        add = 0
+        for i in range(1, histo.GetNbinsX()+1):
+            if (histo.GetBinContent(i) == 0):
+                add += 1
+        return add
+    hist_with_holes = {
+        key: count_zeros(histo)
+        for key, histo in Dict_Hist.items()
+        if count_zeros(histo) > 0
+    }
+    return hist_with_holes
+
+
+def fill_histogram_holes_Fix_value(histo, value_to_fill=10e-4) -> List[str]:
+    """
+    Fill all the holes contained in a histogram.
+
+    Parameters:
+        histo (TH1F): histograms with holes.
+        value_to_fill (Float): value that will be used to fill the histogram
+        holes.
+    Return:
+        histo (TH1F): histogram without holes.
+    """
+    for i in range(1, histo.GetNbinsX()+1):
+        if (histo.GetBinContent(i) == 0):
+            histo.SetBinContent(i, value_to_fill)
+    return histo
+
+
+def fill_histogram_holes_interp1d(hist):
+    """
+    Uses linear interpolation to fill holes in a TH1F histogram.
+    """
+    # Extract the histogram data as a numpy array
+    hist_data = np.array(
+        [hist.GetBinContent(i) for i in range(1, hist.GetNbinsX()+1)]
+    )
+
+    # Replace bin-high = 0 values with NaN values
+    hist_data[hist_data == 0] = np.nan
+
+    # Identify the missing values in the array
+    missing_values = np.isnan(hist_data)
+
+    # Create an interpolator for the non-missing values
+    x = np.arange(len(hist_data))
+    y = hist_data[~missing_values]
+    f = interp1d(x[~missing_values], y, kind='linear')
+
+    # Use the interpolator to fill in the missing values
+    hist_data[missing_values] = f(x[missing_values])
+
+    # Replace the NaN values with 0
+    hist_data[np.isnan(hist_data)] = 0
+
+    # Update the histogram with the interpolated data
+    for i in range(1, hist.GetNbinsX()+1):
+        hist.SetBinContent(i, hist_data[i-1])
