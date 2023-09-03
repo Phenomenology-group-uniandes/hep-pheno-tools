@@ -9,7 +9,6 @@ __all__ = [
 ]
 
 
-# get the lastest version from github when the framework is imported
 def update():
     import os
     import subprocess
