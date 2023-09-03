@@ -4,7 +4,6 @@ from pathlib import Path
 from ROOT import TChain
 from urllib.request import urlopen
 
-URL_DEF_PATHS = "https://raw.githubusercontent.com/Phenomenology-group-uniandes/Uniandes_Framework/main/SimulationsPaths.csv"
 
 class DelphesLoader():
     """
@@ -30,36 +29,40 @@ class DelphesLoader():
     """
 
     # Constructor
-    def __init__(self, name_signal: str, path: str=None, **kwargs) -> None:
+    def __init__(self,
+                 name_signal: str,
+                 path: str,
+                 **kwargs
+                 ) -> None:
         """
         Parameters
         ----------
         name_signal : str
             Name of the signal to load
-        path : str, optional
-            Path to the simulation root outputs, by default URL_DEF_PATHS
+        path : str
+            Path to the simulation root outputs
         """
 
         # Name of the signal
         self.name = name_signal
         # Path to the simulation root outputs
-        data = self._read_path(path if path else URL_DEF_PATHS)
-        
+        data = self._read_path(path)
+
         # verify dictionary path
         try:
-            self._path_to_signal = data[self.name][0] # Path
+            self._path_to_signal = data[self.name][0]  # Path
         except KeyError:
             raise Exception(f"Error: {self.name} Signal not defined")
-        
+
         # Extract Cross Section
         self.xs = data[self.name][1]
-        
+
         # Get the delphes root outputs
         self.Forest = self._get_forest(kwargs.get('glob', '**/*.root'))
-        
-        load=self.name+" imported with "
-        load+=str(len(self.Forest)) + " trees!\n"
-        load+=self._path_to_signal
+
+        load = self.name+" imported with "
+        load += str(len(self.Forest)) + " trees!\n"
+        load += self._path_to_signal
         print(load, flush=True)
 
     # path reader to simulation root outputs
@@ -77,8 +80,8 @@ class DelphesLoader():
         dict
             Dictionary with the path to the simulation root outputs
         """
-        url_protocols = ["http://", "https://", "ftp://", "ftps://" ]
-        
+        url_protocols = ["http://", "https://", "ftp://", "ftps://"]
+
         if any(path.startswith(p) for p in url_protocols):
             f = urlopen(path)
             reader = csv.reader(f.read().decode('utf-8').splitlines())
@@ -91,7 +94,7 @@ class DelphesLoader():
         data = {row[0]: row[1:] for row in reader if len(row) > 0}
         f.close()
         return data
-    
+
     # Set and get glob to search the delphes root outputs
     def set_glob(self, glob: str) -> None:
         """
@@ -103,11 +106,12 @@ class DelphesLoader():
             Glob to search the delphes root outputs
         """
         self._glob = glob
-    ##
+
     def get_glob(self) -> str:
         """
         Get the glob to search the delphes root outputs when glob is defined.
-        if glob is not defined, set the default glob to '**/*.root' and return it
+        if glob is not defined, set the default glob to '**/*.root' and return
+        it
 
         returns
         -------
@@ -133,37 +137,45 @@ class DelphesLoader():
         """
 
         self.set_glob(glob)
-        def natural_sort(l): 
+
+        def natural_sort(list):
             import re
-            convert = lambda text: int(text) if text.isdigit() else text.lower()
-            alphanum_key = lambda key: [convert(c) for c in re.split('([0-9]+)', key)]
-            return sorted(l, key=alphanum_key)
-        #Search for all root files in path to signal
+
+            def convert(text):
+                if text.isdigit():
+                    return int(text)
+                else:
+                    return text.lower()
+
+            def alphanum_key(key):
+                return [convert(c) for c in re.split('([0-9]+)', key)]
+            return sorted(list, key=alphanum_key)
+
         path_root = Path(self._path_to_signal)
         forest = [root_file.as_posix() for root_file in path_root.glob(glob)]
         return natural_sort(forest)
-    
-    
+
     def get_nevents(self, Forest: list = None) -> int:
         """
-        Get the number of events in the delphes root outputs when Forest isn't None.
-        if Forest is None, use the default Forest and return the number of events.
-        
+        Get the number of events in the delphes root outputs when Forest isn't
+        None. if Forest is None, use the default Forest and return the number
+        of events.
+
         parameters
         ----------
         Forest : list, optional
             List with the delphes root outputs, by default None
-            
+
         returns
         -------
         int
             Number of events in the delphes root outputs
         """
         if Forest is None:
-            Forest=self.Forest
-        self.nevents=0
-        for i,job in enumerate(Forest):
-            tree=TChain("Delphes;1")
+            Forest = self.Forest
+        self.nevents = 0
+        for i, job in enumerate(Forest):
+            tree = TChain("Delphes;1")
             tree.Add(job)
-            self.nevents+=tree.GetEntries()
+            self.nevents += tree.GetEntries()
         return self.nevents
