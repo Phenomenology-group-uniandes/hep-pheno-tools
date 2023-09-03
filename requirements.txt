@@ -9,6 +9,8 @@ nbconvert[webpdf]
 metakernel
 calysto-bash
 matplotlib
+seaborn
+numpy
 pandas
 uproot
 tqdm
