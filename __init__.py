@@ -1,11 +1,13 @@
 from . import analysis_tools
 from . import delphes_reader
 from . import lhe_reader
+from . import madgraph_tools
 
 __all__ = [
     "analysis_tools",
     "delphes_reader",
     "lhe_reader",
+    "madgraph_tools",
 ]
 
 
