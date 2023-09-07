@@ -21,4 +21,10 @@ def update():
         shell=True,
         cwd=os.path.dirname(os.path.abspath(__file__)),
     )
+    # install new requirements with low verbosity
+    subprocess.run(
+        "pip install -r requirements.txt -q",
+        shell=True,
+        cwd=os.path.dirname(os.path.abspath(__file__)),
+    )
     print("Done!")
