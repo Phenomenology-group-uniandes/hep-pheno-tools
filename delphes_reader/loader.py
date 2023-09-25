@@ -31,7 +31,9 @@ class DelphesLoader():
     # Constructor
     def __init__(self,
                  name_signal: str,
-                 path: str,
+                 path: str = os.path.join(
+                     'hep_pheno_tools',
+                     'SimulationsPaths.csv'),
                  **kwargs
                  ) -> None:
         """
