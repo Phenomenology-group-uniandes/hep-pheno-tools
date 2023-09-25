@@ -1,14 +1,14 @@
+import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import seaborn as sns
-import numpy as np
 from scipy.interpolate import griddata
 
-import matplotlib.pyplot as plt
 plt.rcParams["font.family"] = "serif"
 
 
 def read_excel(path, index_colum=0):
-    '''This function receives a path to an excel file and returns the DataFrame
+    """This function receives a path to an excel file and returns the DataFrame
     contained.
 
     Parameters:
@@ -18,7 +18,7 @@ def read_excel(path, index_colum=0):
 
     Return:
     - data: Pandas DataFrame.
-    '''
+    """
 
     data = pd.read_excel(path, index_col=index_colum)
     data.sort_index(level=0, ascending=False, inplace=True)
@@ -29,7 +29,7 @@ def read_excel(path, index_colum=0):
 
 
 def read_csv(path, index_colum=0):
-    '''This function receives a path to an csv file and returns the DataFrame
+    """This function receives a path to an csv file and returns the DataFrame
     contained.
 
     Parameters:
@@ -39,7 +39,7 @@ def read_csv(path, index_colum=0):
 
     Return:
     - data: Pandas DataFrame.
-    '''
+    """
 
     data = pd.read_csv(path, index_col=index_colum)
     data.sort_index(level=0, ascending=False, inplace=True)
@@ -49,7 +49,7 @@ def read_csv(path, index_colum=0):
 
 
 def smooth(Data, log=False):
-    '''This function receives an array of data and interpolates the data to
+    """This function receives an array of data and interpolates the data to
     re-turn a larger and "continuous" DataFrame.
 
     Parameters:
@@ -62,7 +62,7 @@ def smooth(Data, log=False):
 
     Return:
     - data_i: Pandas DataFrame.
-    '''
+    """
 
     index = Data.index  # DataFrame row labels
     columns = Data.columns  # DataFrame column labels
@@ -75,7 +75,7 @@ def smooth(Data, log=False):
     # Instead of having a matrix where the function is evaluated according to
     # the row and column, it is better to rewrite everything in a three column
     # format. Simply: A, B, F(A,B). This is what the following code does:
-    matrix = np.zeros([len(columns)*len(index), 3])
+    matrix = np.zeros([len(columns) * len(index), 3])
     column_0 = []
     for i in range(len(columns)):
         for j in range(len(index)):
@@ -102,15 +102,15 @@ def smooth(Data, log=False):
     # the other takes different values ​​must be taken into account, this is
     # what the len(--) == 1 represent:
 
-    if (len(columns) == 1):
+    if len(columns) == 1:
         x = columns
     else:
-        x = np.linspace(np.min(Data['A']), np.max(Data['A']), 500)
+        x = np.linspace(np.min(Data["A"]), np.max(Data["A"]), 500)
 
-    if (len(index) == 1):
+    if len(index) == 1:
         y = index
     else:
-        y = np.linspace(np.min(Data['B']), np.max(Data['B']), 500)
+        y = np.linspace(np.min(Data["B"]), np.max(Data["B"]), 500)
 
     # At this point we already have "x" and "y", now we must combine them to
     # take into account all the combinations, this is done by np.meshgrid:
@@ -119,22 +119,20 @@ def smooth(Data, log=False):
     # Finally, it would be enough to interpolate using our data as a base;
     # However, three cases must be taken into account:
 
-    if (len(columns) == 1):
+    if len(columns) == 1:
         data_i = griddata(
-            Data['B'].values, Data['F(A,B)'].values, y, method='cubic'
-            )
+            Data["B"].values, Data["F(A,B)"].values, y, method="cubic"
+        )
         data_i = pd.DataFrame(data_i)
         data_i.index = y
         data_i.columns = x
         data_i.columns = [round(i, 2) for i in data_i.columns]
         data_i.index = [round(i, 2) for i in data_i.index]
 
-    elif (len(index) == 1):
+    elif len(index) == 1:
         data_i = griddata(
-            Data['A'].values,
-            Data['F(A,B)'].values,
-            x,
-            method='cubic')
+            Data["A"].values, Data["F(A,B)"].values, x, method="cubic"
+        )
         data_i = pd.DataFrame(data_i)
         data_i.index = x
         data_i.columns = y
@@ -146,11 +144,11 @@ def smooth(Data, log=False):
         data_i.index = [round(i, 2) for i in data_i.index]
     else:
         data_i = griddata(
-            (Data['A'].values, Data['B'].values),
-            Data['F(A,B)'].values,
+            (Data["A"].values, Data["B"].values),
+            Data["F(A,B)"].values,
             (gridx, gridy),
-            method='cubic'
-            )
+            method="cubic",
+        )
         data_i = pd.DataFrame(data_i)
         data_i.index = y
         data_i.columns = x
@@ -162,14 +160,13 @@ def smooth(Data, log=False):
 
 
 def plot_heatmap(
-        Data,
-        level_curves={},
-        level_curves_labels_locations=[],
-        zoom_region={},
-        **kwargs
-        ):
-
-    '''This function plots the heat map of a DataFrame. In addition to this, it
+    Data,
+    level_curves={},
+    level_curves_labels_locations=[],
+    zoom_region={},
+    **kwargs
+):
+    """This function plots the heat map of a DataFrame. In addition to this, it
     also plots contour lines and zoom_regions if the user wants it.
 
     Parameters:
@@ -186,41 +183,39 @@ def plot_heatmap(
 
     Return:
     - fig, ax, curves: matplotlib.pyplot subplots and contours.
-    '''
+    """
 
     curves = 0
     fig, ax = plt.subplots()
     try:
-        plt.title(kwargs['title'])
+        plt.title(kwargs["title"])
     except KeyError:
         pass
 
     try:
-        plt.title(kwargs['title_right'], loc='right')
+        plt.title(kwargs["title_right"], loc="right")
     except KeyError:
         pass
 
     try:
-        plt.title(kwargs['title_left'], loc='left')
+        plt.title(kwargs["title_left"], loc="left")
     except KeyError:
         pass
 
-    x_label = kwargs.get('x_label', '')
-    y_label = kwargs.get('y_label', '')
-    cbar_label = kwargs.get('cbar_label', '')
-    color = kwargs.get('color', 'viridis')
-    File_name = kwargs.get('File_name', '')
+    x_label = kwargs.get("x_label", "")
+    y_label = kwargs.get("y_label", "")
+    cbar_label = kwargs.get("cbar_label", "")
+    color = kwargs.get("color", "viridis")
+    File_name = kwargs.get("File_name", "")
 
     index = Data.index
     columns = Data.columns
 
-    if (len(index) == 1 or len(columns) == 1):
+    if len(index) == 1 or len(columns) == 1:
         Data.sort_index(level=0, ascending=False, inplace=True)
-        sns.heatmap(
-            Data,
-            cmap=color,
-            cbar_kws={'label': cbar_label}
-            ).set(xlabel=x_label, ylabel=y_label)
+        sns.heatmap(Data, cmap=color, cbar_kws={"label": cbar_label}).set(
+            xlabel=x_label, ylabel=y_label
+        )
 
     else:
         mapa_calor = plt.pcolormesh(columns, index, Data.values, cmap=color)
@@ -233,51 +228,52 @@ def plot_heatmap(
     # the matplotlib contour function cannot be used due to the dimension of
     # said variable. In that case, it is necessary to plot asymptotes .
 
-    if (len(list(level_curves.keys())) != 0):
-
+    if len(list(level_curves.keys())) != 0:
         index = Data.index
         columns = Data.columns
 
-        if (len(index) == 1):
-            linestyles = ['-', '--', '-.', ':', '']
+        if len(index) == 1:
+            linestyles = ["-", "--", "-.", ":", ""]
             for i in range(len(list(level_curves.keys()))):
                 curva = list(level_curves.keys())[i]
                 indice = np.abs(np.asarray(Data - curva)).argmin()
                 # It is plotted with the sign inside the plot:
-                ax.axvline(indice, ls=linestyles[1], color='white')
+                ax.axvline(indice, ls=linestyles[1], color="white")
                 ax.text(
                     indice - 20,
                     0.5,
                     level_curves[curva],
                     rotation=90,
-                    color='white'
-                    )
+                    color="white",
+                )
 
-        elif (len(columns) == 1):
-
-            linestyles = ['-', '--', '-.', ':', '']
+        elif len(columns) == 1:
+            linestyles = ["-", "--", "-.", ":", ""]
             for i in range(len(list(level_curves.keys()))):
                 curva = list(level_curves.keys())[i]
                 indice = np.abs(np.asarray(Data - curva)).argmin()
 
                 # It is plotted with the sign inside the plot:
-                ax.axhline(indice, ls=linestyles[1], color='white')
-                ax.text(0.5, indice + 20, level_curves[curva], color='white')
+                ax.axhline(indice, ls=linestyles[1], color="white")
+                ax.text(0.5, indice + 20, level_curves[curva], color="white")
         else:
             curves = plt.contour(
                 Data.columns,
                 Data.index,
-                Data.values, levels=list(sorted(level_curves.keys())),
-                colors=['white'], linestyles='dashed')  # Level curves
-            if (len(level_curves_labels_locations) != 0):
+                Data.values,
+                levels=list(sorted(level_curves.keys())),
+                colors=["white"],
+                linestyles="dashed",
+            )  # Level curves
+            if len(level_curves_labels_locations) != 0:
                 ax.clabel(
                     curves,
                     curves.levels,
                     manual=level_curves_labels_locations,
                     fmt=level_curves,
                     fontsize=10,
-                    rightside_up=True
-                    )  # Labels level curves location
+                    rightside_up=True,
+                )  # Labels level curves location
             else:
                 ax.clabel(
                     curves,
@@ -285,34 +281,34 @@ def plot_heatmap(
                     inline=True,
                     fmt=level_curves,
                     fontsize=10,
-                    rightside_up=True)  # Labels level curves
+                    rightside_up=True,
+                )  # Labels level curves
 
-    if (len(list(zoom_region.keys())) != 0):
-        if (len(index) == 1 or len(columns) == 1):
-            raise ValueError('It is not possible to zoom_region in this case')
+    if len(list(zoom_region.keys())) != 0:
+        if len(index) == 1 or len(columns) == 1:
+            raise ValueError("It is not possible to zoom_region in this case")
 
         else:
             ax_zoom = ax.inset_axes([1.4, 0, 1, 1])
             ax_zoom.pcolormesh(
-                Data.columns,
-                Data.index,
-                Data.values,
-                cmap=color)
-            if (len(list(level_curves.keys())) != 0):
+                Data.columns, Data.index, Data.values, cmap=color
+            )
+            if len(list(level_curves.keys())) != 0:
                 ax_zoom.contour(
                     Data.columns,
                     Data.index,
                     Data.values,
                     levels=list(sorted(level_curves.keys())),
-                    colors=['white'], linestyles='dashed'
-                    )  # Curvas de nivel
+                    colors=["white"],
+                    linestyles="dashed",
+                )  # Curvas de nivel
 
-            ax_zoom.set_xlim(zoom_region['x1'], zoom_region['x2'])
-            ax_zoom.set_ylim(zoom_region['y1'], zoom_region['y2'])
+            ax_zoom.set_xlim(zoom_region["x1"], zoom_region["x2"])
+            ax_zoom.set_ylim(zoom_region["y1"], zoom_region["y2"])
             ax_zoom.set_xlabel(x_label)
             ax_zoom.set_ylabel(y_label)
             ax.indicate_inset_zoom(ax_zoom, edgecolor="black")
-    if (File_name != ''):
-        plt.savefig(File_name, bbox_inches='tight')
+    if File_name != "":
+        plt.savefig(File_name, bbox_inches="tight")
 
     return fig, ax, curves

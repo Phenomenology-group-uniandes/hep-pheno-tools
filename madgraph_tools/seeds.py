@@ -3,7 +3,7 @@ from pathlib import Path
 
 
 # function to generate different random seeds
-def get_new_seed(seeds, max_seed=10000):
+def get_new_seed(seeds, max_seed=100000):
     """
     Function to generate different random seeds
 
