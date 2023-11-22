@@ -4,7 +4,7 @@ from multiprocessing import Pool
 import os
 import numpy as np
 import pandas as pd
-from xgboost  import XGBClassifier
+from xgboost import XGBClassifier
 from sklearn.metrics import accuracy_score
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
