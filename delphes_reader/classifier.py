@@ -1,20 +1,14 @@
 from .particles import ElectronParticle as Electron
-from .particles import JetParticle
-from .particles import MetParticle
-from .particles import MuonParticle
-
+from .particles import JetParticle, MetParticle, MuonParticle
 
 jets_NAMES_DIC = {
-    'l_jet': "j",
-    'b_jet': "b",
-    'tau_jet': "#tau",
-    'other_jet': "other"
+    "l_jet": "j",
+    "b_jet": "b",
+    "tau_jet": "#tau",
+    "other_jet": "other",
 }
 
-leptons_NAMES_DIC = {
-    'electron': "e",
-    'muon': "#mu"
-}
+leptons_NAMES_DIC = {"electron": "e", "muon": "#mu", "lep": "l"}
 
 NAMES_DIC = jets_NAMES_DIC.copy()
 NAMES_DIC.update(leptons_NAMES_DIC)
@@ -22,73 +16,73 @@ NAMES_DIC.update(leptons_NAMES_DIC)
 # Set default kinematic cuts from cms detector
 DEFAULT_CUTS = {}
 DEFAULT_CUTS["l_jet"] = {
-    "pt_min_cut": 30.,
-    "eta_min_cut": -5.,
-    "eta_max_cut": +5.
+    "pt_min_cut": 30.0,
+    "eta_min_cut": -5.0,
+    "eta_max_cut": +5.0,
 }
 DEFAULT_CUTS["b_jet"] = {
-    "pt_min_cut": 30.,
+    "pt_min_cut": 30.0,
     "eta_min_cut": -2.5,
-    "eta_max_cut": +2.5
+    "eta_max_cut": +2.5,
 }
 DEFAULT_CUTS["tau_jet"] = {
-    "pt_min_cut": 20.,
+    "pt_min_cut": 20.0,
     "eta_min_cut": -2.3,
-    "eta_max_cut": +2.3
+    "eta_max_cut": +2.3,
 }
 
 DEFAULT_CUTS["other_jet"] = {
-    "pt_min_cut": 0.,
-    "eta_min_cut": -5.,
-    "eta_max_cut": +5.
+    "pt_min_cut": 0.0,
+    "eta_min_cut": -5.0,
+    "eta_max_cut": +5.0,
 }
 
 DEFAULT_CUTS["electron"] = {
     "pt_min_cut": 25,
     "eta_min_cut": -2.4,
-    "eta_max_cut": +2.4
+    "eta_max_cut": +2.4,
 }
-
+DEFAULT_CUTS["lep"] = DEFAULT_CUTS["electron"]
 DEFAULT_CUTS["muon"] = DEFAULT_CUTS["electron"]
 
 
 def get_met(event):
-    ''' Returns a Met Particle.
+    """Returns a Met Particle.
     Parameters:
         event (TChain): Delphes file (.root) event.
     Return:
         Particle: MetParticles.
-    '''
+    """
     return MetParticle(event)
 
 
 def get_unified(part_dic):
-    ''' Unifies all particles (contained in part_dic) in a python directory
+    """Unifies all particles (contained in part_dic) in a python directory
     that contains them without any label to separate them.
     Parameters:
         part_dic (Particle python directory): Contains all particles separated
         by their type as a key of the directory.
     Return:
         Particle (python dictionary): Contains all particles with key "all".
-    '''
+    """
     unified = [
         particle for particles in part_dic.values() for particle in particles
-        ]
+    ]
     unified.sort(reverse=True, key=lambda x: x.pt)
     return {"all": unified}
 
 
 def get_muons(event):
-    ''' Returns a list of muon particles present in a Delphes file event.
+    """Returns a list of muon particles present in a Delphes file event.
     Parameters:
         event (TChain): Delphes file (.root) event.
     Return:
         list: Contains all muon particles.
-    '''
+    """
     # get all muons
     muons = [
         MuonParticle(event, entry) for entry in range(event.Muon.GetEntries())
-        ]
+    ]
     # sort muons by pt descending
     muons.sort(reverse=True, key=lambda x: x.pt)
     # set name of each muon
@@ -99,16 +93,16 @@ def get_muons(event):
 
 
 def get_electrons(event):
-    ''' Returns a list of electron particles present in a Delphes file event.
+    """Returns a list of electron particles present in a Delphes file event.
     Parameters:
         event (TChain): Delphes file (.root) event.
     Return:
         List[ElectronParticle]: List that contains all electrons.
-    '''
+    """
     # get all electrons
     electrons = [
         Electron(event, entry) for entry in range(event.Electron.GetEntries())
-        ]
+    ]
     # sort electrons by pt descending
     electrons.sort(reverse=True, key=lambda x: x.pt)
     # set name of each electron
@@ -119,18 +113,15 @@ def get_electrons(event):
 
 
 def get_leptons(event):
-    '''Returns a python directory that contains all leptons (muon and electron
+    """Returns a python directory that contains all leptons (muon and electron
     particles) that are present in an delphes file event.
     Parameters:
         event (TChain): Delphes file (.root) event.
     Return:
         Particle (python directory): Directory that contains all leptons.
-    '''
+    """
     # get all leptons
-    lepton_dic = {
-        'electron': get_electrons(event),
-        'muon': get_muons(event)
-    }
+    lepton_dic = {"electron": get_electrons(event), "muon": get_muons(event)}
     # sort leptons by pt descending
     for key in lepton_dic.keys():
         lepton_dic[key].sort(reverse=True, key=lambda x: x.pt)
@@ -139,7 +130,7 @@ def get_leptons(event):
 
 
 def get_jets(event):
-    '''Returns a dictionary containing all jet particles present in a Delphes
+    """Returns a dictionary containing all jet particles present in a Delphes
     file event.
 
     Parameters:
@@ -147,7 +138,7 @@ def get_jets(event):
 
     Returns:
         dict: Contains all jets.
-    '''
+    """
     jet_dict = {key: [] for key in jets_NAMES_DIC.keys()}
 
     # classifies the jet particles by their type
@@ -163,7 +154,7 @@ def get_jets(event):
 
 
 def get_good_particles(particles_dic, kin_cuts=None):
-    ''' Returns a dictionary that contains particles within the range of
+    """Returns a dictionary that contains particles within the range of
     kinematic cuts.
     Parameters:
         particles_dic (dict): Contains all particles separated by their type
@@ -173,7 +164,7 @@ def get_good_particles(particles_dic, kin_cuts=None):
         "pt_max_cut", "eta_min_cut" and "eta_max_cut".
     Return:
         dict: Contains all particles that are within the range of kincuts.
-    '''
+    """
     if kin_cuts is None:
         kin_cuts = DEFAULT_CUTS
     good_particles = {}
@@ -210,7 +201,7 @@ def get_good_particles(particles_dic, kin_cuts=None):
 
 
 def get_good_leptons(event_particles, kin_cuts=None):
-    ''' Returns a python directory that contains lepton particles that are
+    """Returns a python directory that contains lepton particles that are
     within the range of kinematic cuts contained in kin_cuts.
     Parameters:
         event_particles (Particle python directory or Tchain event): It could
@@ -223,7 +214,7 @@ def get_good_leptons(event_particles, kin_cuts=None):
         Particle (dict): Contains all particles that that are within the range
         of kinematic cuts. This dictionary contains all jet particles separated
         by their type as a key of the directory.
-    '''
+    """
     if kin_cuts is None:
         kin_cuts = DEFAULT_CUTS
     if isinstance(event_particles, dict):
@@ -237,14 +228,14 @@ def get_good_leptons(event_particles, kin_cuts=None):
     leptons = get_unified(get_good_particles(leptons_dic, kin_cuts))["all"]
 
     for n, lepton in enumerate(leptons):
-        j = n+1
+        j = n + 1
         lepton.set_name(f"lep_{{{j}}}")
 
     return leptons
 
 
 def get_good_jets(event_particles, kin_cuts=None):
-    '''Returns a dictionary containing jet particles within a range of kincuts.
+    """Returns a dictionary containing jet particles within a range of kincuts.
 
     Parameters:
         event_particles (dict or TChain): A dictionary containing all jet
@@ -257,7 +248,7 @@ def get_good_jets(event_particles, kin_cuts=None):
     Returns:
         dict: Contains all jet particles that are within the range of kincuts,
         separated by their type as keys in the dictionary.
-    '''
+    """
     if kin_cuts is None:
         kin_cuts = DEFAULT_CUTS
     if isinstance(event_particles, dict):
