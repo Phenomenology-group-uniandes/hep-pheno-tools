@@ -19,7 +19,6 @@ def get_kinematics_row(particles: list) -> dict:
 
     row = {}
     for i, particle in enumerate(particles):
-
         # Save main kinematic variables
         name = particle.name
         row[f"pT_{{{name}}}(GeV)"] = particle.pt
@@ -29,7 +28,7 @@ def get_kinematics_row(particles: list) -> dict:
         row[f"Mass_{{{name}}}(GeV))"] = particle.m
 
         # Calculate Delta Functions with other particles
-        for j in range(i+1, len(particles)):
+        for j in range(i + 1, len(particles)):
             co_particle = particles[j]
             co_name = co_particle.name
             suffix = f"_{{{name}{co_name}}}"
@@ -39,8 +38,8 @@ def get_kinematics_row(particles: list) -> dict:
             row[f"#Delta{{#phi}}{suffix}"] = particle.delta_phi(co_particle)
 
             dpt1 = particle.delta_pt_scalar(co_particle)
-            dpt2 = particle.delta_pt_scalar(co_particle)
-            dp = particle.delta_p_scalar(co_particle)
+            dpt2 = particle.delta_pt_vectorial(co_particle)
+            dp = particle.delta_p_vectorial(co_particle)
             row[f"#Delta{{pT}}{suffix}(GeV)"] = dpt1
             row[f"#Delta{{#vec{{pT}}}}{suffix}(GeV)"] = dpt2
             row[f"#Delta{{#vec{{p}}}}{suffix}(GeV)"] = dp
