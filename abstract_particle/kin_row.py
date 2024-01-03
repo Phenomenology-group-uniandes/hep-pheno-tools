@@ -25,7 +25,7 @@ def get_kinematics_row(particles: list) -> dict:
         row[f"#eta_{{{name}}}"] = particle.eta
         row[f"#phi_{{{name}}}"] = particle.phi
         row[f"Energy_{{{name}}}(GeV)"] = particle.energy
-        row[f"Mass_{{{name}}}(GeV))"] = particle.m
+        # row[f"Mass_{{{name}}}(GeV))"] = particle.m
 
         # Calculate Delta Functions with other particles
         for j in range(i + 1, len(particles)):
