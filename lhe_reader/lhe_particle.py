@@ -20,7 +20,7 @@ class LHEParticle(Particle):
         self.px = px
         self.py = py
         self.pz = pz
-        self.energy = energy
+        # self.energy = energy
         self.tlv.SetPxPyPzE(px, py, pz, energy)
         self.mass = mass
         self.spin = spin
