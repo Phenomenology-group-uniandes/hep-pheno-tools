@@ -1,4 +1,4 @@
-from . import Particle
+from ..abstract_particle import Particle
 
 
 def get_kinematics_row(particles: list) -> dict:
