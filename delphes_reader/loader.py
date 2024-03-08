@@ -1,11 +1,12 @@
-import os
 import csv
+import os
 from pathlib import Path
-from ROOT import TChain
 from urllib.request import urlopen
 
+from ROOT import TChain
 
-class DelphesLoader():
+
+class DelphesLoader:
     """
     Class to load the delphes root outputs
 
@@ -29,13 +30,13 @@ class DelphesLoader():
     """
 
     # Constructor
-    def __init__(self,
-                 name_signal: str,
-                 path: str = os.path.join(
-                     'hep_pheno_tools',
-                     'SimulationsPaths.csv'),
-                 **kwargs
-                 ) -> None:
+    def __init__(
+        self,
+        name_signal: str,
+        path: str = os.path.join("hep_pheno_tools", "SimulationsPaths.csv"),
+        is_bkg: bool = False,
+        **kwargs,
+    ) -> None:
         """
         Parameters
         ----------
@@ -47,22 +48,29 @@ class DelphesLoader():
 
         # Name of the signal
         self.name = name_signal
-        # Path to the simulation root outputs
-        data = self._read_path(path)
 
-        # verify dictionary path
-        try:
-            self._path_to_signal = data[self.name][0]  # Path
-        except KeyError:
-            raise Exception(f"Error: {self.name} Signal not defined")
+        if is_bkg:
+            # Path to the simulation root outputs
+            data = self._read_path(path)
 
-        # Extract Cross Section
-        self.xs = data[self.name][1]
+            # verify dictionary path
+            try:
+                self._path_to_signal = data[self.name][0]  # Path
+            except KeyError:
+                raise Exception(f"Error: {self.name} Signal not defined")
+
+            # Extract Cross Section
+            self.xs = data[self.name][1]
+        else:
+            if os.path.exists(path):
+                self._path_to_signal = path
+            else:
+                raise Exception(f"Error: {path} not found")
 
         # Get the delphes root outputs
-        self.Forest = self._get_forest(kwargs.get('glob', '**/*.root'))
+        self.Forest = self._get_forest(kwargs.get("glob", "**/*.root"))
 
-        load = self.name+" imported with "
+        load = self.name + " imported with "
         load += str(len(self.Forest)) + " trees!\n"
         load += self._path_to_signal
         print(load, flush=True)
@@ -86,11 +94,11 @@ class DelphesLoader():
 
         if any(path.startswith(p) for p in url_protocols):
             f = urlopen(path)
-            reader = csv.reader(f.read().decode('utf-8').splitlines())
+            reader = csv.reader(f.read().decode("utf-8").splitlines())
         else:
             if not os.path.exists(path):
                 raise Exception(f"Error: {path} not found")
-            f = open(path, 'r')
+            f = open(path, "r")
             reader = csv.reader(f.read().splitlines())
 
         data = {row[0]: row[1:] for row in reader if len(row) > 0}
@@ -150,7 +158,8 @@ class DelphesLoader():
                     return text.lower()
 
             def alphanum_key(key):
-                return [convert(c) for c in re.split('([0-9]+)', key)]
+                return [convert(c) for c in re.split("([0-9]+)", key)]
+
             return sorted(list, key=alphanum_key)
 
         path_root = Path(self._path_to_signal)
@@ -181,3 +190,13 @@ class DelphesLoader():
             tree.Add(job)
             self.nevents += tree.GetEntries()
         return self.nevents
+
+    def get_unfied_root_tree(self):
+        if self.get_nevents() >= 2**24:
+            raise Exception(
+                "You cannot load more than 2^24 events in a single tree, ROOT limitation"
+            )
+        tree = TChain("Delphes;1")
+        for job in self.Forest:
+            tree.Add(job)
+        return tree
