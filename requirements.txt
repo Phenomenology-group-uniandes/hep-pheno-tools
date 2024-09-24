@@ -21,3 +21,4 @@ openpyxl
 html5lib 
 pytest
 coverage
+wget
